@@ -278,7 +278,7 @@ disp(T20-T19+" Section 20")
 disp(T21-T20+" Section 21")
 disp(T22-T21+" Section 22")
 
- =  torque_per_location/(0.19*gear_ratio); %divide by gear ratio to get motor torque (not wheel torque) as that dictates current
+current =  torque_per_location/(0.19*gear_ratio); %divide by gear ratio to get motor torque (not wheel torque) as that dictates current
 number_parallel_batteries = 6;
 number_series_batteries = 32;
 resistance = 0.015; %in ohms
