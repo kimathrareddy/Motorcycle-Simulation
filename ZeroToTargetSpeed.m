@@ -6,16 +6,16 @@ Cross_Sect_Area = 0.5; %m^2
 Drag_Coeff = 0.6;
 Ptire = 200000; %in bar
 
-%Initial Parameters
-Vinit = 0;%in m/s
-Vfinal = 0;
+%Target speed of the motorcycle
+FinalSpeed = 100; %in km/h
 
 %Simulation Parameters
+Vinit = 0; %in m/s
+Vfinal = 0;
+tnet = 0;
 tStepSize = 0.0001; %seconds
-acceleration = 0.1;
-energy_lost = -1;
+acceleration = 0;
 index = 1;
-count = 0;
 invalid_num = 0;
 
 prompt = ['Hyper 9X1: 1\nAC-20 96V: 2\nAC-34 96V: 3\nAC-23 96V: 4\nEMRAX 208: 5\nEMRAX 188: 6\n'];
@@ -88,7 +88,7 @@ end
 
 Power = zeros(1,8001); %already in kW
 for n = 1:5000 %start filling power values 0-5000rpm
-    Power(n) = 2+0.009784*(n*1); 
+    Power(n) = 2+0.009784*(n*1);
 end
 for n = 5001:8000 %start filling power values 5001-8000rpm
     Power(n) = -0.0084*(n*1)+90.4;
@@ -200,7 +200,6 @@ end
 %-----AC-23 96V motor end --------
 
 elseif motor_choice == 5
-
 %-----EMRAX 208 motor start ------
 MotEff = 0.90;
 rpm = 0:1:6000;
@@ -216,11 +215,11 @@ for n = 4001:6001 %start filling torque values 4000-6000rpm
 end
 
 Power = zeros(1,6001); %already in kW
-for n = 1:5000 %start filling power values 0-5000rpm
-    Power(n) = 2+0.0128*(n*1);
+for n = 1:4000 %start filling power values 0-4000rpm
+    Power(n) = 2+0.014*(n*1);
 end
-for n = 5001:6001 %start filling power values 4000-6000rpm
-    Power(n) = 0.004*(n*1)+44;
+for n = 4001:6001 %start filling power values 4000-6000rpm
+    Power(n) = 0.006*(n*1)+32;
 end
 
 %Account for gear ratio, already in N*m
@@ -282,40 +281,35 @@ end
 
 %-----EMRAX 188 motor end --------
 
+
 else 
     invalid_num = 1;
 end
 
+
 %-----------MAIN CODE START-----
 %-------------------------------
-while invalid_num == 0 && acceleration > 0.01 && count ~= 100000000 && energy_lost < Power(index) %count is to get out of an infinite loop if acceleration is always > 0
-    acceleration = getAccel(Vinit,Cross_Sect_Area,Drag_Coeff,mass,Ptire,Torque(index),wheel_radius);
+
+while Vinit <= FinalSpeed/3.6 && invalid_num == 0 
+    acceleration = getAccel(Vinit,Cross_Sect_Area,Drag_Coeff,mass,Ptire,Torque(index),wheel_radius); 
     PowerCheck = Power(index);
-    energy_lost = getEnergyLost(Vinit,Cross_Sect_Area,Drag_Coeff,mass,Ptire); 
+    energy_lost = getEnergyLost(Vinit,Cross_Sect_Area,Drag_Coeff,mass,Ptire); %% in watts
     if energy_lost > PowerCheck
-        disp("The system cannot provide the needed power at "+Vinit*3.6+" km/h");
-%         disp(PowerCheck+" "+energy_lost)
+        disp("The system cannot provide the needed power at "+Vinit*3.6+"km/h");
         break
     end
     Vfinal = getVfinal(acceleration,tStepSize,Vinit);
     Vinit = Vfinal;
-    index = getIndexOfGraphValues(Vinit,speed, Array_limit);
-    count = count +1;
-    
+    index = getIndexOfGraphValues(Vinit,speed,Array_limit);
+    tnet = tnet + tStepSize;
 end
 
 if invalid_num == 1
-    disp("invalid input")
-
-elseif count == 100000000 
-disp("Graph data is too small to find max speed")
-disp("max speed available is "+speed(Array_limit)*3.6+" km/h")
-disp("acceleration is "+acceleration)
-disp("Current speed is "+Vinit*3.6+" km/h")
+    disp("invalid number input");
 else
-    disp(Vinit*3.6+" km/h max speed")
-    disp("Acceleration is "+acceleration+" m/s^2")
-    disp("Theoretical max speed is "+speed(Array_limit)*3.6+" km/h")
+    disp(tnet);
 end
+ 
+
 %-----------MAIN CODE END-------
 %-------------------------------

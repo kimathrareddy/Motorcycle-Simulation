@@ -54,7 +54,6 @@ function [speedFinal] = straightSection(Vinit_last_section,radius_next_section,t
 
         
         % braking region, passed the accelerating zone already
-
         Vout = sqrt(radius_next_section*c*9.81); %the max speed we can do into the next corner 
         disp("track length " + track_length+" Brake distance " + d_brake+" section "+ section+" speed "+ Vinit);
         
@@ -84,7 +83,7 @@ function [speedFinal] = straightSection(Vinit_last_section,radius_next_section,t
             d_left = d_left+stepLength;
         end 
         
-        if Vinit>Vout
+        if Vinit>Vout %if speed coming into corner is greater than max speed
             %reset the values
             tnet_temp = tnet;
             energy_count_temp = energy_count;

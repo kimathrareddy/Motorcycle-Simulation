@@ -96,7 +96,7 @@ function [speedFinal] = hybridSection(Vinit_last_section,radius_next_section,rad
             d_left = d_left+stepLength;
         end 
         
-        if Vinit>Vout
+        if Vinit>Vout %if speed coming into corner is greater than max speed
             %reset the values
             tnet_temp = tnet;
             energy_count_temp = energy_count;
